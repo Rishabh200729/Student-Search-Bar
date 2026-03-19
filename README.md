@@ -1,37 +1,54 @@
 # 🎓 Student Search Application
 
-A full-stack, responsive student search web application. The platform features an intelligent, lazy-loaded search bar that queries a backend mock database, providing real-time highlighted results and displaying detailed student profiles.
-
-## 🚀 Features
-- **Real-time Search:** Search queries fire seamlessly as you type.
-- **Lazy Loading (Debouncing):** API calls are intelligently delayed by 300ms to prevent network spam and ensure optimal performance.
-- **Smart Highlighting:** The searched text correctly highlights within the result names (with spaces and special characters handled seamlessly).
-- **Responsive UI:** A premium, modern dark-mode aesthetic utilizing Tailwind CSS and beautiful Lucide icons.
-- **Error States:** Gracefully handles empty results and protects against Regex crashes.
+A full-stack, responsive student search web application. This platform features an intelligent, lazy-loaded search bar that queries a backend mock database, providing real-time highlighted results and displaying detailed student profiles.
 
 ---
 
-## 🛠️ Technology Stack
-- **Frontend:** React, Tailwind CSS, Lucide React (Icons), Vite.
-- **Backend:** Node.js, Express.js.
-- **Database:** Mock JSON Dataset (`student_data.json` - exactly 50 students).
+## 📂 Folder Structure
+
+```text
+student-search-app/
+├── backend/
+│   ├── controllers/
+│   │   └── studentController.js    # Logic for filtering and slicing results
+│   ├── data/
+│   │   └── student_data.json       # Mock JSON Database (50 Students)
+│   ├── routes/
+│   │   └── studentRoutes.js        # API Routing
+│   ├── server.js                   # Express Server Entry Point
+│   ├── vercel.json                 # Vercel Configuration for Deployment
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── HighlightedText.jsx # Regex matching and text highlighting
+│   │   │   ├── SearchBar.jsx       # Input, dropdown, and API fetching logic
+│   │   │   └── StudentDetails.jsx  # Renders the selected student card
+│   │   ├── hooks/
+│   │   │   └── useDebounce.js      # Custom debounce logic for lazy loading
+│   │   ├── App.jsx                 # Main React component
+│   │   └── index.css               # Tailwind CSS Entry Point
+│   ├── package.json
+│   └── vite.config.js
+└── README.md
+```
 
 ---
 
-## ⚙️ Setup & Installation Instructions
+## ⚙️ How to Run Locally
 
-Follow these steps to run the application locally on your machine.
+Follow these exact steps to run the application on your local machine.
 
 ### 1. Backend Setup
 1. Open a terminal and navigate to the backend directory:
    ```bash
    cd backend
    ```
-2. Install the necessary dependencies:
+2. Install the necessary dependencies (Express, CORS, etc.):
    ```bash
    npm install
    ```
-3. Start the backend server:
+3. Start the Node.js backend server:
    ```bash
    npm start
    ```
@@ -42,7 +59,7 @@ Follow these steps to run the application locally on your machine.
    ```bash
    cd frontend
    ```
-2. Install frontend dependencies:
+2. Install the React frontend dependencies:
    ```bash
    npm install
    ```
@@ -50,27 +67,41 @@ Follow these steps to run the application locally on your machine.
    ```bash
    npm run dev
    ```
-   *(The frontend should immediately be accessible at `http://localhost:5173` or similar).*
+   *(The frontend should immediately be accessible in your browser at `http://localhost:5173`).*
 
 ---
 
-## 🧠 Approach, Design Choices & Optimizations
+## ✅ Fulfillment of Requirements
 
-### 1. The custom `useDebounce` Hook
-Without debouncing, typing "Hari" would fire off 4 independent API calls (`H`, `Ha`, `Har`, `Hari`), putting intense pressure on the server and leading to potential race-condition bugs on slow internet connections. I implemented a custom `useDebounce` hook that creates a 300ms buffer window. It strictly prevents the code from executing expensive network requests until the user actually pauses their typing. 
+### 1. Student Database (Mock Data)
+**How it was fulfilled:** 
+The backend utilizes a local JSON file (`backend/data/student_data.json`) containing exactly 50 mock students. We completely avoided MongoDB or any NoSQL databases as required. The Node.js controller natively reads this JSON file into memory when handling search requests instead of querying an external database instance.
 
-### 2. Component Architecture & Separation of Concerns
-The React UI avoids the "God Component" anti-pattern by heavily utilizing compositional components:
-- `App.jsx` handles global state and layout.
-- `SearchBar.jsx` focuses entirely on input handling, state buffers, and calling the API.
-- `StudentDetails.jsx` is a dumb presentation component that strictly renders the final data. 
-- `HighlightedText.jsx` encapsulates the complex logic of string splitting.
+### 2. Search Bar Functionality
+**How it was fulfilled:** 
+The application strictly enforces a "minimum 3 character" rule (`if (searchTerm.length >= 3)`) before any API request is made. The backend strictly enforces a maximum of 5 matching students using `results.slice(0, 5)`. The dropdown updates dynamically, and successfully selecting a student mounts the full `<StudentDetails />` component displaying their Name, Class, and unique Roll Number exactly as requested.
 
-### 3. Resilient "Bulletproof" Regex
-Creating dynamic Regular Expressions (`new RegExp(query)`) normally crashes web pages if users search for reserved symbols like `(` or `*`. Our `HighlightedText.jsx` module takes the user's string, cleanly `trim()`s it, and programmatically escapes any dangerous characters (`/[.*+?^${}()|[\]\\]/g`). This prevents app-crashing `SyntaxError`s!
+### 3. Backend API (Mandatory)
+**How it was fulfilled:** 
+A lightweight RESTful Node/Express API was constructed. The primary endpoint (`/api/students/search?name=...`) intercepts the query parameter via the frontend, filters the local `student_data.json` mock database in memory, and returns the strictly formatted JSON array.
 
-### 4. Refactoring UI to Tailwind Native Color Palette
-We recently upgraded the application's overall codebase quality by refactoring arbitrary generic Hex Codes (`#161b25`, `#7a8299`) into strict, standard Tailwind color tokens (`slate-900`, `slate-400`). This unifies the color palette drastically, ensures that Dark Mode/Light Mode swapping is far more feasible in the future, and instantly elevated readability.
+### 4. Frontend UI (React.js Only)
+**How it was fulfilled:** 
+The frontend is built purely using React (Vite) and does not rely on heavy UI component libraries. The interface leverages modern Tailwind CSS and Lucide React icons for a responsive, clean, dark-mode aesthetic that scales elegantly between mobile and desktop viewing environments.
 
-### 5. Backend Controlled Results
-The Node.js backend controller leverages `.slice(0, 5)` to intentionally enforce constraints. Rather than sending the entire heavy 50+ student JSON file back to the browser and burdening the client to filter, the backend calculates the query, limits the payload mathematically, and ensures the UI never breaks layout constraints.
+### 5. Performance Considerations
+**How it was fulfilled:** 
+To protect the server from being spammed by keystrokes, the search inherently relies on **Lazy Loading implementation**. The backend limits responses via `.slice()`, preventing the browser from attempting to render hundreds or thousands of DOM nodes regardless of how large the underlying JSON dataset becomes.
+
+### 6. Edge Cases Considered
+**How it was fulfilled:** 
+- **Similar Prefixes:** Using the Javascript `includes()` operator reliably matches inner substrings (e.g., 'Amrit' will correctly return 'Amritpal Singh').
+- **Case-Insensitivity:** Both the frontend's highlighting and the backend's filtering convert strings to `.toLowerCase()` prior to string comparisons.
+- **Roll Numbers:** Duplicate names are handled perfectly because React `keys` and selection references use the strictly unique `rollNumber`.
+- **Special Characters & Spaces:** User input is parsed through `.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')` prior to being assembled into a Regular Expression, rendering app-crashing `SyntaxError`s impossible. Queries are also `trim()`'d prior to fetch.
+
+### 7. Optional Enhancements (Bonus)
+**How it was fulfilled:** 
+- **Text Highlighting:** The custom `<HighlightedText />` component dynamically slices and identifies exact substring matches to visually highlight identical characters in dark amber.
+- **Debounce Optimization:** A custom React Hook (`useDebounce.js`) sets a rigid `300ms` delay buffer over the input state, absolutely confirming the user has paused typing before the fetch officially fires.
+- **Vercel Deployment:** The repository is natively configured via custom `vercel.json` (to expose the Express app as a serverless function) and dynamic Environment Variables (`VITE_API_URL`) to seamlessly run in cloud production exactly as it performs locally.

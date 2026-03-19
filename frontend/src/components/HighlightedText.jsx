@@ -6,7 +6,7 @@ const HighlightedText = ({ text, highlight }) => {
     const escapedHighlight = trimmedHighlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escapedHighlight})`, "gi"); // g for global and i for case insensitive 
     const parts = text.split(regex);
-
+    console.log(parts);
 
     return (
         <span>
