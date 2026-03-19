@@ -29,7 +29,10 @@ const SearchBar = ({ onSelect }) => {
                 setLoading(true);
                 setShowEmpty(false);
                 try {
-                    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+                    // Remove trailing slash if user accidently pasted it in Vercel Environment Variables
+                    const rawApiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+                    const API_BASE_URL = rawApiUrl.replace(/\/$/, "");
+                    
                     const response = await fetch(`${API_BASE_URL}/api/students/search?name=${encodeURIComponent(searchTerm)}`);
                     if (!response.ok) {
                         setResults([]);

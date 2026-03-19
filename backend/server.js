@@ -11,6 +11,13 @@ app.use(express.json());
 
 
 app.use("/api/students", studentRouter);
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+
+// Export the Express API for Vercel serverless functions
+module.exports = app;
+
+// Only start the server locally if not in a Vercel environment
+if (process.env.NODE_ENV !== "production") {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
