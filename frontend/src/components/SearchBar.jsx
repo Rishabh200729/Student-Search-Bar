@@ -29,7 +29,8 @@ const SearchBar = ({ onSelect }) => {
                 setLoading(true);
                 setShowEmpty(false);
                 try {
-                    const response = await fetch(`http://localhost:3000/api/students/search?name=${encodeURIComponent(searchTerm)}`);
+                    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+                    const response = await fetch(`${API_BASE_URL}/api/students/search?name=${encodeURIComponent(searchTerm)}`);
                     if (!response.ok) {
                         setResults([]);
                         setShowEmpty(true);
